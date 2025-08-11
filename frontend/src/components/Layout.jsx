@@ -4,7 +4,7 @@ import Navbar from './Navbar'
 
 const Layout = ({ showSidebar = false, children }) => {
   return (
-    <div className='min-h-screen' data-theme="forest">
+    <div className='min-h-screen'>
         <div className='flex'>
             {/* SIDEBAR */}
             {showSidebar && <Sidebar />}

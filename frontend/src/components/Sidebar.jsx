@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 // import useAuthUser from "../hooks/useAuthUser";
-import { Bell, Home, ShipWheel, Users } from "lucide-react";
+import { MessageSquare, ClipboardList, Layers, Upload, Bot, Bell, Home, GraduationCapIcon, Users } from "lucide-react";
+import ChatSidebar from "./ChatSidebar";
 
 const Sidebar = () => {
   // const { authUser } = useAuthUser();
@@ -9,16 +10,17 @@ const Sidebar = () => {
 
   return (
     <aside className="w-64 bg-base-200 border-r border-base-300 hidden lg:flex flex-col h-screen sticky top-0" >
-      <div className="p-5 border-b border-base-300">
+      <div className="p-5 border-base-300">
         <Link to="/" className="flex items-center gap-2.5">
-          <ShipWheel className="size-9 text-primary" />
+          <GraduationCapIcon className="size-9 text-primary" />
           <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary  tracking-wider">
-            Streamify
+            Learnify
           </span>
         </Link>
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
+        {/* HOME */}
         <Link
           to="/"
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
@@ -29,16 +31,62 @@ const Sidebar = () => {
           <span>Home</span>
         </Link>
 
+        {/* CHAT */}
         <Link 
-          to="/friends"
+          to="/chat"
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            currentPath === "/friends" ? "btn-active" : ""
+            currentPath === "/chat" ? "btn-active" : ""
           }`}
         >
-          <Users className="size-5 text-base-content opacity-70" />
-          <span>Friends</span>
+          <MessageSquare className="size-5 text-base-content opacity-70" />
+          <span>Chat</span>
         </Link>
 
+        {/* ASSIGNMENTS */}
+        {/* <Link 
+          to="/assignments"
+          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
+            currentPath === "/assignments" ? "btn-active" : ""
+          }`}
+        >
+          <ClipboardList className="size-5 text-base-content opacity-70" />
+          <span>Assignments</span>
+        </Link> */}
+
+        {/* FLASHCARDS */}
+        <Link 
+          to="/flashcards"
+          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
+            currentPath === "/flashcards" ? "btn-active" : ""
+          }`}
+        >
+          <Layers className="size-5 text-base-content opacity-70" />
+          <span>Flashcards</span>
+        </Link>
+
+        {/* UPLOAD & MATERIALS */}
+        <Link 
+          to="/upload"
+          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
+            currentPath === "/upload" ? "btn-active" : ""
+          }`}
+        >
+          <Upload className="size-5 text-base-content opacity-70" />
+          <span>Upload & Materials</span>
+        </Link>
+
+        {/* AI ASSISTANT */}
+        <Link 
+          to="/assistant"
+          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
+            currentPath === "/assistant" ? "btn-active" : ""
+          }`}
+        >
+          <Bot className="size-5 text-base-content opacity-70" />
+          <span>AI Assistant</span>
+        </Link>
+
+        {/* NOTIFICATIONS */}
         <Link
           to="/notifications"
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
