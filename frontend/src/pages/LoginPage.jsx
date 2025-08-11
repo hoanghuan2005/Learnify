@@ -31,7 +31,6 @@ const LoginPage = () => {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8 bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5"
-      data-theme="forest"
     >
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
