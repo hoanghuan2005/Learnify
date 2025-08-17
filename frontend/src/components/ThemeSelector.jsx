@@ -11,7 +11,7 @@ const ThemeSelector = () => {
     <div className="dropdown dropdown-end mr-2">
       {/* DROPDOWN TRIGGER */}
       <button tabIndex={0} className="btn btn-ghost btn-circle">
-        <PaletteIcon className="size-6" />
+        <PaletteIcon className="size-6 text-base-content opacity-70" />
       </button>
 
       <div
