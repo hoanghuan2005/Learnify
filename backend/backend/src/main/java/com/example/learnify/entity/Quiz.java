@@ -29,7 +29,7 @@ public class Quiz {
 
     @ManyToOne
     @JoinColumn(name = "created_by")
-    private User createdBy;
+    private User user;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();

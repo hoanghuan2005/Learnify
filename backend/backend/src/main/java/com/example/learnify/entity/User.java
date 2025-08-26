@@ -6,8 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
-import java.time.LocalDateTime;
 
+import com.example.learnify.enums.UserRole;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class User {
 
     @Id
@@ -30,8 +32,9 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role = "student";
+    private UserRole role;
 
     private int xp = 0;
 
@@ -40,11 +43,20 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "otp_code")
+    private String otpCode;
+
+    @Column(name = "otp_expiry")
+    private LocalDateTime otpExpiry;
+
+    @Column(name = "enabled")
+    private boolean enabled = false;
+    
     // Relations
     @OneToMany(mappedBy = "user")
     private List<Material> materials;
 
-    @OneToMany(mappedBy = "createdBy")
+    @OneToMany(mappedBy = "user")
     private List<Quiz> quizzes;
 
     @OneToMany(mappedBy = "user")
