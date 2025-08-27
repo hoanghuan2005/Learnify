@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.learnify.dtos.LoginRequest;
+import com.example.learnify.dtos.OtpVerifyRequest;
+import com.example.learnify.dtos.RegisterRequest;
 import com.example.learnify.security.JwtService;
 import com.example.learnify.service.AuthService;
 import com.example.learnify.service.OtpService;
@@ -31,21 +33,22 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         authService.register(request);
+        // System.out.println(">>> Register called with: " + request);
         return ResponseEntity.ok("User registered. Please verify your email.");
     }
 
-    @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestBody OtpVerifyRequest request) {
-        boolean success = otpService.verifyOtp(request.getEmail(), request.getOtp());
-        if (success) {
-            return ResponseEntity.ok("OTP verified successfully. You can login now.");
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP");
-    }
+    // @PostMapping("/verify-otp")
+    // public ResponseEntity<?> verifyOtp(@RequestBody OtpVerifyRequest request) {
+    //     boolean success = otpService.verifyOtp(request.getEmail(), request.getOtpCode());
+    //     if (success) {
+    //         return ResponseEntity.ok("OTP verified successfully. You can login now.");
+    //     }
+    //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP");
+    // }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        String token = authService.login(request);
-        return ResponseEntity.ok(Map.of("token", token));
-    }
+    // @PostMapping("/login")
+    // public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    //     String token = authService.login(request);
+    //     return ResponseEntity.ok(Map.of("token", token));
+    // }
 }
