@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
+import com.example.learnify.dtos.OtpVerifyRequest;
 import com.example.learnify.entity.User;
 import com.example.learnify.repository.UserRepository;
 
@@ -54,9 +55,12 @@ public class OtpService {
         return sb.toString();
     }
 
-    // Hàm verify OTP
-    public boolean verifyOtp(String email, String otpCode) {
-        User user = userRepository.findByEmail(email).orElse(null);
+    // Hàm verify OTP - Register
+    public boolean verifyOtp(OtpVerifyRequest otpVerifyRequest) {
+
+        String otpCode = otpVerifyRequest.getOtpCode();
+
+        User user = userRepository.findByEmail(otpVerifyRequest.getEmail()).orElse(null);
         if (user == null) return false;
 
         if (user.getOtpCode() == null || user.getOtpExpiry() == null) return false;
@@ -64,4 +68,9 @@ public class OtpService {
         return user.getOtpCode().equals(otpCode)
                 && user.getOtpExpiry().isAfter(LocalDateTime.now());
     } 
+
+    // verify otp - forgot password
+
+
+    // verify otp - change password
 }

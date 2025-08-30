@@ -35,8 +35,8 @@ export const completeOnboarding = async (userData) => {
   return res.data;
 };
 
-export const verifyOtp = async ({ email, otpCode }) => {
-  const res = await axiosInstance.post("/auth/verify-otp", { email, otpCode });
+export const verifyOtp = async ({ otpCode }) => {
+  const res = await axiosInstance.post("/auth/verify-otp", { otpCode });
   return res.data;
 };
 
