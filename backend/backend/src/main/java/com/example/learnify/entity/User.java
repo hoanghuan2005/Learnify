@@ -6,8 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 
+import com.example.learnify.enums.UserRole;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -15,6 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class User {
 
     @Id
@@ -28,10 +32,12 @@ public class User {
     private String email;
 
     @Column(name = "password_hash", nullable = false)
+    @JsonIgnore
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role = "student";
+    private UserRole role = UserRole.CLIENT;
 
     private int xp = 0;
 
@@ -40,34 +46,53 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "otp_code")
+    private String otpCode;
+
+    @Column(name = "otp_expiry")
+    private LocalDateTime otpExpiry;
+
+    @Column(name = "enabled")
+    private boolean enabled = false;
+    
     // Relations
-    @OneToMany(mappedBy = "user")
-    private List<Material> materials;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Material> materials = new ArrayList<>();
 
-    @OneToMany(mappedBy = "createdBy")
-    private List<Quiz> quizzes;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Quiz> quizzes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<Answer> answers;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Answer> answers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<UserBadge> userBadges;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<UserBadge> userBadges = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<LeaderBoard> leaderboardEntries;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<LeaderBoard> leaderboardEntries = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<StudyRoom> studyRoomsCreated;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<StudyRoom> studyRoomsCreated = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<RoomMember> roomMemberships;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<RoomMember> roomMemberships = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<Message> messages;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Message> messages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<LearningProgress> learningProgresses;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<LearningProgress> learningProgresses = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<Recommendation> recommendations;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Recommendation> recommendations = new ArrayList<>();
 }
