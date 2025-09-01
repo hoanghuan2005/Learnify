@@ -24,13 +24,13 @@ public class JwtService {
      * @param userId The user's ID.
      * @return The generated JWT token string.
      */
-    public String generateToken(String username, String role, Long userId) { // Added userId parameter
+    public String generateToken(String email, String role, Long userId) { // Added userId parameter
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .subject(username)
+                .subject(email)
                 .issuedAt(now)
                 .expiresAt(now.plus(30, ChronoUnit.MINUTES)) // Consider making duration configurable
-                .claim("role", role)
+                .claim("role", role != null ? role : "USER")
                 .claim("userId", userId) // Added userId claim
                 .build();
 
@@ -48,7 +48,13 @@ public class JwtService {
 
     public boolean isTokenValid(String token) {
         try {
-            decoder.decode(token);
+            Jwt jwt = decoder.decode(token);
+            
+            // Check if token is expired
+            if (jwt.getExpiresAt() != null && jwt.getExpiresAt().isBefore(java.time.Instant.now())) {
+                return false;
+            }
+            
             return true;
         } catch (JwtException e) {
             // Log the exception if needed: log.warn("JWT validation failed: {}", e.getMessage());

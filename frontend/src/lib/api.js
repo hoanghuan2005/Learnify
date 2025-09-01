@@ -12,6 +12,11 @@ export const signup = async (signupData) => {
 
 export const login = async (loginData) => {
   const response = await axiosInstance.post("/auth/login", loginData);
+  
+  if (response.data.token) {
+    localStorage.setItem("token", response.data.token);
+  }
+  
   return response.data;
 };
 

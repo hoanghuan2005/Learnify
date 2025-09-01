@@ -76,7 +76,7 @@ public class AuthService {
 
             return jwtService.generateToken(
                 user.getEmail(),
-                user.getRole().name(),
+                user.getRole() != null ? user.getRole().name() : "USER",
                 user.getId()
             );
 

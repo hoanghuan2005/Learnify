@@ -65,8 +65,16 @@ public class OtpService {
 
         if (user.getOtpCode() == null || user.getOtpExpiry() == null) return false;
 
-        return user.getOtpCode().equals(otpCode)
-                && user.getOtpExpiry().isAfter(LocalDateTime.now());
+        boolean valid = user.getOtpCode().equals(otpCode)
+            && user.getOtpExpiry().isAfter(LocalDateTime.now());
+
+        if (valid) {
+            user.setEnabled(true);  // enable account
+            user.setOtpCode(null);  // tranh reuse otp
+            user.setOtpExpiry(null);
+            userRepository.save(user);
+        }
+        return valid;
     } 
 
     // verify otp - forgot password
