@@ -25,7 +25,7 @@ public class StudyRoom {
 
     @ManyToOne
     @JoinColumn(name = "created_by")
-    private User createdBy;
+    private User user;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 

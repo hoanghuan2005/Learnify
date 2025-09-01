@@ -1,12 +1,22 @@
 import { axiosInstance } from "./axios";
 
 export const signup = async (signupData) => {
-  const response = await axiosInstance.post("/auth/signup", signupData);
+  const payload = {
+    username: signupData.fullName,
+    email: signupData.email,
+    password: signupData.password,
+  };
+  const response = await axiosInstance.post("/auth/register", payload);
   return response.data;
 };
 
 export const login = async (loginData) => {
   const response = await axiosInstance.post("/auth/login", loginData);
+  
+  if (response.data.token) {
+    localStorage.setItem("token", response.data.token);
+  }
+  
   return response.data;
 };
 
@@ -27,6 +37,11 @@ export const getAuthUser = async () => {
 
 export const completeOnboarding = async (userData) => {
   const res = await axiosInstance.post("/auth/onboarding", userData);
+  return res.data;
+};
+
+export const verifyOtp = async ({ otpCode }) => {
+  const res = await axiosInstance.post("/auth/verify-otp", { otpCode });
   return res.data;
 };
 
@@ -70,11 +85,11 @@ export const getFriendRequests = async () => {
           profilePic: "https://placekitten.com/80/80",
           fullName: "John Doe",
           nativeLanguage: "English",
-          learningLanguage: "Vietnamese"
-        }
-      }
+          learningLanguage: "Vietnamese",
+        },
+      },
     ],
-    acceptedReqs: []
+    acceptedReqs: [],
   };
 };
 
@@ -93,7 +108,7 @@ export const getStreamToken = async () => {
 
   // Trả về dữ liệu giả
   return {
-    token: "mock-token-1234567890", 
+    token: "mock-token-1234567890",
     expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // Hết hạn sau 1h
   };
 };
