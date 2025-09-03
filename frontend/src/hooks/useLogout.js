@@ -10,6 +10,11 @@ const useLogout = () => {
   const { mutate, isPending, error } = useMutation({
     mutationFn: logout,
     onSuccess: () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userInfo");
+      
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
       navigate("/login");
     },
