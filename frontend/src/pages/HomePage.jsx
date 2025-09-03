@@ -13,12 +13,7 @@ import { capitalize } from "../lib/utils";
 
 import FriendCard, { getLanguageFlag } from "../components/FriendCard";
 import NoFriendsFound from "../components/NoFriendsFound";
-
-const actions = [
-  { to: "/workplace/new-meeting", label: "New Meeting", icon: VideoIcon, color: "bg-orange-500" },
-  { to: "/workplace/join", label: "Join", icon: LogInIcon, color: "bg-blue-500" },
-  { to: "/workplace/calendar", label: "Calendar", icon: CalendarIcon, color: "bg-green-500" },
-];
+import Workplace from "../components/workplace/Workplace";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -58,34 +53,7 @@ const HomePage = () => {
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="container mx-auto space-y-10">
 
-        {/* ACTION REQUESTS */}
-        <div className="flex flex-col gap-4">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-6">Workplace Actions</h2>
-          <div className="flex flex-wrap justify-center gap-24">
-            <Link to="/workplace/new-meeting" className="flex flex-col items-center">
-              <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center shadow-md">
-                <VideoIcon className="text-white w-9 h-9" />
-              </div>
-              <span className="mt-2 text-sm font-medium">New meeting</span>
-            </Link>
-
-            {/* Join */}
-            <Link to="/workplace/join" className="flex flex-col items-center">
-              <div className="w-20 h-20 rounded-2xl bg-secondary flex items-center justify-center shadow-md">
-                <Plus className="text-white w-9 h-9" />
-              </div>
-              <span className="mt-2 text-sm font-medium">Join</span>
-            </Link>
-
-            {/* Calendar */}
-            <Link to="/workplace/calendar" className="flex flex-col items-center">
-              <div className="w-20 h-20 rounded-2xl bg-accent flex items-center justify-center shadow-md">
-                <CalendarIcon className="text-white w-9 h-9" />
-              </div>
-              <span className="mt-2 text-sm font-medium">Calendar</span>
-            </Link>
-          </div>
-        </div>
+        <Workplace />
 
         {/* FRIENDS */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

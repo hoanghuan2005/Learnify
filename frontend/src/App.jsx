@@ -16,6 +16,9 @@ import OtpVerifyPage from "./pages/OtpVerifyPage.jsx";
 import PageLoader from "./components/PageLoader.jsx";
 import useAuthUser from "./hooks/useAuthUser.js";
 import Layout from "./components/Layout.jsx";
+import NewMeeting from "./components/workplace/NewMeeting.jsx";
+import Join from "./components/workplace/Join.jsx";
+import Calendar from "./components/workplace/Calendar.jsx";
 
 import { Toaster } from "react-hot-toast";
 import { useThemeStore } from "./store/useThemeStore.js";
@@ -40,6 +43,37 @@ const App = () => {
             </Layout>
           }
         />
+
+        <Route
+          path="/workplace/new-meeting"
+          element={
+            <Layout showSidebar>
+              {" "}
+              <NewMeeting />{" "}
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/workplace/join"
+          element={
+            <Layout showSidebar>
+              {" "}
+              <Join />{" "}
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/workplace/calendar"
+          element={
+            <Layout showSidebar>
+              {" "}
+              <Calendar />{" "}
+            </Layout>
+          }
+        />
+
         <Route
           path="/signup"
           element={!authUser ? <SignupPage /> : <Navigate to="/" />}
