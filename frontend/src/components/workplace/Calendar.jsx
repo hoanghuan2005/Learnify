@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { CalendarDays, PlusCircle, Clock, X } from "lucide-react";
+import {
+  getAllEvents,
+  createEvent as apiCreateEvent,
+  updateEvent as apiUpdateEvent,
+  deleteEvent as apiDeleteEvent,
+} from "../../api/calendar";
 
 const HOURS = Array.from({ length: 11 }, (_, i) => 8 + i); // 08:00 - 18:00
 
@@ -42,6 +48,17 @@ function minutesBetween(a, b) {
 
 const STORAGE_KEY = "learnify_meetings_v1";
 
+function toBackendLocalDateTime(date) {
+  const d = new Date(date);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+  const ss = String(d.getSeconds()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}`;
+}
+
 const Calendar = () => {
   const [currentWeekStart, setCurrentWeekStart] = useState(() =>
     getMonday(new Date())
@@ -57,12 +74,34 @@ const Calendar = () => {
   const [draggingId, setDraggingId] = useState(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setMeetings(JSON.parse(raw));
-    } catch (error) {
-      console.warn("Failed to load meetings from localStorage", error);
-    }
+    let isMounted = true;
+    (async () => {
+      try {
+        const data = await getAllEvents();
+        if (!isMounted) return;
+        const mapped = (Array.isArray(data) ? data : []).map((e) => ({
+          id: String(e.id ?? crypto.randomUUID()),
+          title: e.title ?? "Untitled",
+          start: new Date(e.startTime).toISOString(),
+          end: new Date(e.endTime).toISOString(),
+        }));
+        setMeetings(mapped);
+      } catch (error) {
+        console.warn(
+          "Failed to fetch events; falling back to localStorage",
+          error
+        );
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) setMeetings(JSON.parse(raw));
+        } catch (e) {
+          console.warn("Failed to load meetings from localStorage", e);
+        }
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -95,22 +134,48 @@ const Calendar = () => {
     setIsModalOpen(true);
   }
 
-  function createMeeting(e) {
+  async function createMeeting(e) {
     e?.preventDefault?.();
     const start = parseTimeToDate(new Date(form.date), form.startTime);
     const end = parseTimeToDate(new Date(form.date), form.endTime);
     if (!form.title.trim() || end <= start) return;
-    const id = crypto.randomUUID();
-    setMeetings((prev) => [
-      ...prev,
-      {
-        id,
-        title: form.title.trim(),
-        start: start.toISOString(),
-        end: end.toISOString(),
-      },
-    ]);
+    const optimistic = {
+      id: crypto.randomUUID(),
+      title: form.title.trim(),
+      start: start.toISOString(),
+      end: end.toISOString(),
+    };
+    setMeetings((prev) => [...prev, optimistic]);
     setIsModalOpen(false);
+    try {
+      const payload = {
+        title: optimistic.title,
+        description: null,
+        startTime: toBackendLocalDateTime(start),
+        endTime: toBackendLocalDateTime(end),
+        location: null,
+      };
+      const created = await apiCreateEvent(payload);
+      setMeetings((prev) =>
+        prev.map((m) =>
+          m.id === optimistic.id
+            ? {
+                id: String(created.id ?? optimistic.id),
+                title: created.title ?? optimistic.title,
+                start: new Date(
+                  created.startTime ?? optimistic.start
+                ).toISOString(),
+                end: new Date(created.endTime ?? optimistic.end).toISOString(),
+              }
+            : m
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Failed to create event on server; keeping local only",
+        error
+      );
+    }
   }
 
   function onDragStart(ev, id) {
@@ -122,13 +187,15 @@ const Calendar = () => {
     setDraggingId(null);
   }
 
-  function onSlotDrop(ev, date, hour) {
+  async function onSlotDrop(ev, date, hour) {
     ev.preventDefault();
     const id = ev.dataTransfer.getData("text/plain");
     if (!id) return;
+    let previous;
     setMeetings((prev) => {
       const next = prev.map((m) => {
         if (m.id !== id) return m;
+        previous = m;
         const oldStart = new Date(m.start);
         const durationMin = minutesBetween(oldStart, new Date(m.end));
         const newStart = new Date(date);
@@ -143,14 +210,36 @@ const Calendar = () => {
       return next;
     });
     setDraggingId(null);
+    try {
+      const updated = {
+        title: previous?.title ?? "Untitled",
+        description: null,
+        startTime: toBackendLocalDateTime(new Date(previous?.start ?? date)),
+        endTime: toBackendLocalDateTime(new Date(previous?.end ?? date)),
+        location: null,
+      };
+      await apiUpdateEvent(previous?.id, updated);
+    } catch (error) {
+      console.error("Failed to update event; reverting local change", error);
+      setMeetings((prev) =>
+        prev.map((m) => (m.id === previous?.id ? previous : m))
+      );
+    }
   }
 
   function allowDrop(ev) {
     ev.preventDefault();
   }
 
-  function deleteMeeting(id) {
+  async function handleDeleteMeeting(id) {
+    const backup = meetings;
     setMeetings((prev) => prev.filter((m) => m.id !== id));
+    try {
+      await apiDeleteEvent(id);
+    } catch (error) {
+      console.error("Failed to delete event; restoring", error);
+      setMeetings(backup);
+    }
   }
 
   const meetingsByDay = useMemo(() => {
@@ -171,13 +260,13 @@ const Calendar = () => {
   }, [meetings, daysOfWeek]);
 
   return (
-    <div className="p-6">
+    <div className="py-6 px-10">
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <CalendarDays className="w-8 h-8 text-primary" />
           <h1 className="text-2xl font-bold">Meeting Calendar</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             className="btn btn-sm"
             onClick={() => setCurrentWeekStart((d) => addDays(d, -7))}
@@ -192,7 +281,7 @@ const Calendar = () => {
             Today
           </button>
           <button
-            className="btn btn-sm"
+            className="btn btn-sm mr-2"
             onClick={() => setCurrentWeekStart((d) => addDays(d, 7))}
           >
             Next
@@ -274,7 +363,7 @@ const Calendar = () => {
                                 className="opacity-90 hover:opacity-100"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  deleteMeeting(m.id);
+                                  handleDeleteMeeting(m.id);
                                 }}
                               >
                                 <X className="w-3 h-3" />
