@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
+
+import org.springframework.data.annotation.CreatedDate;
+
 import java.util.ArrayList;
 
 import com.example.learnify.enums.UserRole;
@@ -35,16 +38,22 @@ public class User {
     @JsonIgnore
     private String passwordHash;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role = UserRole.CLIENT;
 
+    @Builder.Default
+    @Column(nullable = false)
     private int xp = 0;
 
+    @Builder.Default
+    @Column(nullable = false)
     private int level = 1;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "otp_code")
     private String otpCode;
@@ -52,6 +61,7 @@ public class User {
     @Column(name = "otp_expiry")
     private LocalDateTime otpExpiry;
 
+    @Builder.Default
     @Column(name = "enabled")
     private boolean enabled = false;
     

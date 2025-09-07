@@ -1,5 +1,7 @@
 package com.example.learnify.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -45,11 +47,12 @@ public class AuthService {
 
             User user = User.builder()
                 .username(request.getUsername())
+                // .createdAt(LocalDateTime.now())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(UserRole.CLIENT)
                 .enabled(false)
-                . build();
+                .build();
 
             otpService.generateAndSendOtp(user);
 
