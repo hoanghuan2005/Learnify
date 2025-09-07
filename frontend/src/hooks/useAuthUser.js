@@ -1,27 +1,27 @@
-import { useQuery } from '@tanstack/react-query';
-import React from 'react'
-import { getAuthUser } from '../lib/api';
+// src/hooks/useAuthUser.ts
+import { useQuery } from '@tanstack/react-query'
+import api from '../lib/axios'
+import axios from 'axios'
 
-const useAuthUser = () => {
-  const authUser = useQuery({
-    queryKey: ["authUser"],
-    queryFn: getAuthUser,
-    retry: false, // không tự động retry nếu bị lỗi
-  });
-
-  return { isLoading: authUser.isLoading, error: authUser.error, authUser: authUser.data?.user };
+export default function useAuthUser() {
+  return useQuery({
+    queryKey: ['authUser'],
+    queryFn: async () => {
+      try {
+        const { data } = await api.get('/auth/me'
+          
+          //,  { withCredentials: true }
+          )
+        return data ?? null
+      } catch (err) {
+         if (axios.isAxiosError(err) && [401, 403].includes(err.response?.status ?? 0)) {
+          return null
+        }
+        throw err
+      }
+    },
+    retry: 0,
+    refetchOnWindowFocus: false,
+    staleTime: 60_000,
+  })
 }
-
-export default useAuthUser
-
-// const useAuthUser = () => {
-//   return {
-//     isLoading: false,
-//     error: null,
-//     authUser: {
-//       fullName: "Nguyễn Văn Test",
-//       profilePic: null,
-//     }
-//   };
-// };
-// export default useAuthUser;
