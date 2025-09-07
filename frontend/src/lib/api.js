@@ -1,114 +1,87 @@
-import { axiosInstance } from "./axios";
+import api from '../lib/axios';
 
+// REGISTER (không login ngay)
 export const signup = async (signupData) => {
   const payload = {
     username: signupData.fullName,
     email: signupData.email,
     password: signupData.password,
   };
-  const response = await axiosInstance.post("/auth/register", payload);
-  return response.data;
+  const { data } = await api.post('/auth/register', payload);
+  return data;
 };
 
+// LOGIN (nhận token, lưu & gắn vào axios)
 export const login = async (loginData) => {
-  const response = await axiosInstance.post("/auth/login", loginData);
-  
-  if (response.data.token) {
-    localStorage.setItem("token", response.data.token);
+  const { data } = await api.post('/auth/login', loginData);
+  const token = data?.token;
+  if (token) {
+    localStorage.setItem('token', token);
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   }
-  
-  return response.data;
+  return data;
 };
 
+// LOGOUT (BE optional), luôn dọn client token
 export const logout = async () => {
-  const response = await axiosInstance.post("/auth/logout");
-  return response.data;
+  try { await api.post('/auth/logout'); } catch {}
+  localStorage.removeItem('token');
+  delete api.defaults.headers.common['Authorization'];
+  return { message: 'Logged out' };
 };
 
+// ME (trả null khi 401/403 để UI không treo)
 export const getAuthUser = async () => {
   try {
-    const res = await axiosInstance.get("/auth/me");
-    return res.data;
+    const { data } = await api.get('/auth/me');
+    return data ?? null;
   } catch (error) {
-    console.log("Error in getAuthUser:", error);
-    return null;
+    if (error?.response && [401, 403].includes(error.response.status)) return null;
+    throw error;
   }
 };
 
+// ONBOARDING 
 export const completeOnboarding = async (userData) => {
-  const res = await axiosInstance.post("/auth/onboarding", userData);
-  return res.data;
+  const { data } = await api.post('/auth/onboarding', userData);
+  return data;
 };
 
-export const verifyOtp = async ({ otpCode }) => {
-  const res = await axiosInstance.post("/auth/verify-otp", { otpCode });
-  return res.data;
+// VERIFY OTP 
+export const verifyOtp = async ({ email, otpCode }) => {
+  const { data } = await api.post('/auth/verify-otp', { email, otpCode });
+  return data;
 };
 
+// Friends APIs
 export async function getUserFriends() {
-  const response = await axiosInstance.get("/users/friends");
-  return response.data;
+  const { data } = await api.get('/users/friends');
+  return data;
 }
-
 export async function getRecommendedUsers() {
-  const response = await axiosInstance.get("/users");
-  return response.data;
+  const { data } = await api.get('/users');
+  return data;
 }
-
 export async function getOutgoingFriendReqs() {
-  const response = await axiosInstance.get("/users/outgoing-friend-requests");
-  return response.data;
+  const { data } = await api.get('/users/outgoing-friend-requests');
+  return data;
 }
-
 export async function sendFriendRequest(userId) {
-  const response = await axiosInstance.post(`/users/friend-request/${userId}`);
-  return response.data;
+  const { data } = await api.post(`/users/friend-request/${userId}`);
+  return data;
 }
 
-// export async function getFriendRequests() {
-//   const response = await axiosInstance.get("/users/friend-requests");
-//   return response.data;
-// }
+// Mock (giữ nguyên nếu bạn chưa làm BE)
+export const getFriendRequests = async () => ({
+  incomingReqs: [
+    { _id: '1', sender: { profilePic: 'https://placekitten.com/80/80', fullName: 'John Doe', nativeLanguage: 'English', learningLanguage: 'Vietnamese' } },
+  ],
+  acceptedReqs: [],
+});
+export const acceptFriendRequest = async (_id) => ({ success: true });
 
-// export async function acceptFriendRequest(requestId) {
-//   const response = await axiosInstance.put(`/users/friend-request/${requestId}/accept`);
-//   return response.data;
-// }
-
-export const getFriendRequests = async () => {
-  // Fake data cho test frontend
-  return {
-    incomingReqs: [
-      {
-        _id: "1",
-        sender: {
-          profilePic: "https://placekitten.com/80/80",
-          fullName: "John Doe",
-          nativeLanguage: "English",
-          learningLanguage: "Vietnamese",
-        },
-      },
-    ],
-    acceptedReqs: [],
-  };
-};
-
-export const acceptFriendRequest = async (id) => {
-  return { success: true };
-};
-
-// export async function getStreamToken() {
-//   const response = await axiosInstance.get("/chat/token");
-//   return response.data;
-// }
-
+// Stream token mock
 export const getStreamToken = async () => {
-  // Mock delay để giống như đang gọi API
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  // Trả về dữ liệu giả
-  return {
-    token: "mock-token-1234567890",
-    expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // Hết hạn sau 1h
-  };
+  await new Promise(r => setTimeout(r, 500));
+  return { token: 'mock-token-1234567890', expiresAt: new Date(Date.now() + 3600_000).toISOString() };
 };
