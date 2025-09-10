@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-// import useAuthUser from '../hooks/useAuthUser';
-// import { useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useEffect } from "react";
+import useAuthUser from "../hooks/useAuthUser";
 import toast from "react-hot-toast";
 // import { completeOnboarding } from '../lib/api';
 import {
@@ -9,69 +8,59 @@ import {
   MapPinIcon,
   LoaderIcon,
   ShipWheelIcon,
+  EditIcon,
 } from "lucide-react";
-// import { LANGUAGES } from '../constants/language.js';
-// const OnboardingPage = () => {
+import { LANGUAGES } from "../constants/language.js";
 
-// const { isLoading, error, authUser } = useAuthUser();
+const Profile = () => {
+  const { isLoading, error, data: authUser } = useAuthUser();
 
-// const queryClient = useQueryClient();
+  // Debug logging
+  console.log("Profile component state:", { isLoading, error, authUser });
 
-// const [ formState, setFormState ] = useState({
-//   fullName: authUser?.fullName || '',
-//   bio: authUser?.bio || '',
-//   language: authUser?.language || '',
-//   location: authUser?.location || '',
-//   profilePicture: authUser?.profilePicture || '',
-// });
-
-// const { mutate: onboardingMutation, isPending } = useMutation({
-//   mutationFn: completeOnboarding,
-//   onSuccess: () => {
-//     toast.success("Onboarding completed successfully!");
-//     queryClient.invalidateQueries({ queryKey: ["authUser"] });
-//   },
-// });
-
-//  const handleRandomAvatar = () => {
-//   const idx = Math.floor(Math.random() * 100) + 1; // 1-100 included
-//   const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
-
-//   setFormState({ ...formState, profilePic: randomAvatar });
-//   toast.success("Random profile picture generated!");
-// };
-
-// const handleSubmit = (e) => {
-//   e.preventDefault();
-//   onboardingMutation(formState);
-// };
-
-const LANGUAGES = ["Vietnamese", "English", "Japanese", "French", "German"];
-
-const OnboardingPage = () => {
-  // MOCK USER (thay cho useAuthUser)
-  const authUser = {
-    fullName: "Nguyen Van A",
-    bio: "I'm a test user.",
-    location: "Ho Chi Minh, Vietnam",
-    language: "Vietnamese",
-    profilePicture: "",
-  };
+  // Check if user is logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    console.log("Token in localStorage:", token);
+    console.log("Is user logged in:", !!token);
+  }, []);
 
   const [formState, setFormState] = useState({
-    fullName: authUser.fullName,
-    bio: authUser.bio,
-    location: authUser.location,
-    nativeLanguage: authUser.language,
-    profilePic: authUser.profilePicture,
+    fullName: "",
+    bio: "",
+    language: "",
+    location: "",
+    profilePicture: "",
   });
 
   const [isPending, setIsPending] = useState(false);
 
+  const LANGUAGES = ["Vietnamese", "English", "Japanese", "French", "German"];
+
+  // Update form state when authUser loads
+  useEffect(() => {
+    if (authUser) {
+      console.log("AuthUser data received:", authUser);
+      setFormState({
+        fullName: authUser.username || "",
+        bio: authUser.bio || "",
+        language: authUser.nativeLanguage || authUser.language || "",
+        location: authUser.location || "",
+        profilePicture:
+          authUser.profilePicture ||
+          authUser.profilePic ||
+          authUser.avatarUrl ||
+          `https://api.dicebear.com/9.x/identicon/svg?seed=${
+            authUser.username || "user"
+          }`,
+      });
+    }
+  }, [authUser]);
+
   const handleRandomAvatar = () => {
     const idx = Math.floor(Math.random() * 100) + 1;
     const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
-    setFormState({ ...formState, profilePic: randomAvatar });
+    setFormState({ ...formState, profilePicture: randomAvatar });
     toast.success("Random profile picture generated!");
   };
 
@@ -86,22 +75,55 @@ const OnboardingPage = () => {
     }, 1000);
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-base-100 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-4">
+          <span className="loading loading-spinner loading-lg"></span>
+          <p className="text-lg">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-base-100 flex items-center justify-center p-4">
+        <div className="card bg-base-200 w-full max-w-3xl shadow-xl">
+          <div className="card-body p-6 sm:p-8 text-center">
+            <h1 className="text-2xl font-bold text-error mb-4">
+              Error Loading Profile
+            </h1>
+            <p className="text-base-content opacity-70 mb-4">
+              {error.message || "Failed to load your profile data"}
+            </p>
+            <button
+              className="btn btn-primary"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-base-100 flex items-center justify-center p-4">
       <div className="card bg-base-200 w-full max-w-3xl shadow-xl">
         <div className="card-body p-6 sm:p-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">
-            Complete Your Profile
-          </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* PROFILE PIC */}
             <div className="flex flex-col items-center justify-center space-y-4">
-              <div className="size-32 rounded-full bg-base-300 overflow-hidden">
-                {formState.profilePic ? (
+              <div className="size-32 rounded-full bg-base-300 overflow-hidden mt-2">
+                {formState.profilePicture ? (
                   <img
-                    src={formState.profilePic}
-                    alt="Profile Preview"
+                    src={formState.profilePicture}
+                    alt="Profile avatar"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -123,7 +145,7 @@ const OnboardingPage = () => {
             {/* FULL NAME */}
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Full Name</span>
+                <span className="label-text">Username</span>
               </label>
               <input
                 type="text"
@@ -157,9 +179,9 @@ const OnboardingPage = () => {
                 <span className="label-text">Native Language</span>
               </label>
               <select
-                value={formState.nativeLanguage}
+                value={formState.language}
                 onChange={(e) =>
-                  setFormState({ ...formState, nativeLanguage: e.target.value })
+                  setFormState({ ...formState, language: e.target.value })
                 }
                 className="select select-bordered w-full"
               >
@@ -199,8 +221,8 @@ const OnboardingPage = () => {
             >
               {!isPending ? (
                 <>
-                  <ShipWheelIcon className="size-5 mr-2" />
-                  Complete Onboarding
+                  <EditIcon className="size-5 mr-2" />
+                  Edit Profile
                 </>
               ) : (
                 <>
@@ -216,4 +238,4 @@ const OnboardingPage = () => {
   );
 };
 
-export default OnboardingPage;
+export default Profile;

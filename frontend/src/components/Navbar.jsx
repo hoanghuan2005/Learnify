@@ -112,7 +112,7 @@ const Navbar = () => {
 
                       <div className="mt-3 flex gap-2">
                         <Link to="/profile" className="btn btn-outline btn-sm grow">
-                          Trang cá nhân
+                          Profile
                         </Link>
                         <button
                           className="btn btn-error btn-sm"

@@ -19,6 +19,7 @@ import Layout from "./components/Layout.jsx";
 import NewMeeting from "./components/workplace/NewMeeting.jsx";
 import Join from "./components/workplace/Join.jsx";
 import Calendar from "./components/workplace/Calendar.jsx";
+import Profile from "./pages/Profile.jsx";
 
 import { Toaster } from "react-hot-toast";
 import { useThemeStore } from "./store/useThemeStore.js";
@@ -86,6 +87,12 @@ const App = () => {
           path="/verify-otp"
           element={!authUser ? <OtpVerifyPage /> : <Navigate to="/" />}
         />
+
+        <Route
+          path="/profile"
+          element={!authUser ? <Profile /> : <Navigate to="/" />}
+        />
+
         <Route
           path="/chat"
           element={
